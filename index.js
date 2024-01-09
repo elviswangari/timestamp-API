@@ -1,53 +1,53 @@
 // index.js
 // where your node app starts
 
-// init project
-var express = require('express');
+var express = require("express");
 var app = express();
+var cors = require("cors");
 
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
-var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use(cors({ optionsSuccessStatus: 200 }));
+app.use(express.static("public"));
 
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
-
-// http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+  res.sendFile(__dirname + "/views/index.html");
 });
 
-
-// your first API endpoint... 
 app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+  res.json({ greeting: "hello API" });
 });
 
 app.get('/api/:date?', (req, res) => {
+
   const { date } = req.params;
+
   let dateObj;
 
   if (!date) {
-    // If date is not provided, use the current date
+    // No date provided, use current date
     dateObj = new Date();
-  } else {
-    const timestamp = parseInt(date);
 
-    if (isNaN(timestamp)) {
+  } else if(!isNaN(date)) {
+    // Date is a number, parse it as a timestamp
+    dateObj = new Date(parseInt(date));
+
+  } else {
+    // Date is a string, parse it 
+    dateObj = new Date(date);
+
+    // Check for invalid date
+    if (isNaN(dateObj.getTime())) {
       return res.status(400).json({ error: 'Invalid Date' });
     }
-
-    dateObj = new Date(timestamp);
   }
 
-  // Send the response in the required format
   res.json({
     unix: dateObj.getTime(),
     utc: dateObj.toUTCString()
   });
+
 });
+
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+  console.log("Your app is listening on port " + listener.address().port);
 });
